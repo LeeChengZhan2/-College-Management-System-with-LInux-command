@@ -1,0 +1,33 @@
+#!/bin/bash
+function markrange {
+ mark=$1
+ if ! [[ "$mark" =~ ^[0-9]+$ ]]; then
+  echo -n "Enter integers only. "
+  input=0
+ elif [ $mark -gt 100 -o $mark -lt 0 ]; then
+  input=0
+ elif [ $mark -ge 75 ]; then
+  remark="Excellent"
+  grade="A-"; gpa=3.75
+  if [ $mark -ge 80 ];then
+    grade="A"; gpa=4
+  fi
+ elif [ $mark -ge 65 ]; then
+  remark="Good"
+  grade="B"; gpa=3
+  if [ $mark -ge 70 ];then
+    grade="B+"; gpa=3.5
+  fi
+ elif [ $mark -ge 50 ]; then
+  remark="Pass"
+  grade="C"; gpa=2
+  if [ $mark -ge 60 ];then
+    grade="B-"; gpa=2.75
+  elif [ $mark -ge 55 ]; then
+    grade="C+"; gpa=2.5
+  fi  
+ else
+  remark="Failed"; grade="F"; gpa=0
+ fi
+}
+

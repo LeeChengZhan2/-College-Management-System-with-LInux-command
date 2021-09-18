@@ -1,0 +1,62 @@
+#!/bin/bash
+
+clear
+student=./student.txt
+
+printf  "%10s"
+tput smul
+printf "Search Student Details Form\n"
+tput rmul
+
+stuId=""
+while  [[ ! $stuId =~ ^[0-9]{2}[A-Z]{3}[0-9]{5}$ ]]
+do
+  echo -n -e "\nEnter Student ID     : ";read stuId
+  stuId=${stuId^^}
+  if [[ $stuId =~ ^[Qq]$ ]]; then
+   echo "returning to menu..."; sleep 1; ./t1menu ; exit 0
+  fi
+  if  [[ ! $stuId =~ ^[0-9]{2}[A-Z]{3}[0-9]{5}$ ]]
+  then 
+     echo -e "Invalid Input! Please check the input. FORMAT [12ABC34567]"
+  elif ! [ -f "$student" ]; then
+   echo "Student file not available.";
+   echo "Press Enter to return."; read null
+   ./t1menu; exit 0
+  elif [ ! -s $student ]; then
+   echo "Student file empty.";
+   echo "Press Enter to return."; read null
+   ./t1menu; exit 0
+  elif grep -q $stuId $student
+  then
+     break
+  else
+     echo -e "This Student ID is not in our database. Please enter again."
+     stuId=""
+  fi
+done
+
+studentList=$(grep "$stuId" "$student")
+IFS=: read progId stuId stuName birDate conNumb maiAddr emaAddr<<< $studentList
+echo -e "\nStudent Name        : $stuName"
+echo "Contact Number      : $conNumb"
+echo "Mailing Address     : $maiAddr"
+echo -e "Email               : $emaAddr\n"
+
+input=0
+until [ $input = 1 ]
+do
+   echo -n -e "\nSearch Another Student?(y)es or (q)uit: "; read choice
+   
+   case "$choice" in
+   [Yy])  ./searchstud ;exit ;;
+   [Qq])  ./t1menu ;exit ;;
+   *) echo " ! Please respond with (y)es or (q)uit" ;;
+   esac
+done
+   
+   
+
+
+
+

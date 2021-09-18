@@ -1,0 +1,133 @@
+#!/bin/bash
+clear
+courses="./course.txt"
+stuID=$1
+stuName=$2
+touch "$( echo "$stuID" )result.txt"
+chmod +x "$( echo "$stuID" )result.txt"	#allow checking for repeated records
+chksvdccode="./$( echo "$stuID" )result.txt"
+resultFile="$( echo "$stuID" )result.txt"
+i=0
+totalpoints=0
+source $(dirname "$0")/markrange    #import functions from markrange script
+
+echo -e "\t\tStudent Examination Marks Form"
+echo -e ' '$_{1..31}'\b_'
+
+until [[ $validyear = 1 ]]
+do
+ echo -n -e "\nAcademic Year (YYYY) : "; read year; validyear=1
+ if [[ $year =~ ^[Qq]$ ]]; then
+   echo "returning to menu..."; sleep 1; ./t1menu ; exit 0
+ fi
+ if ! [[ $year =~ ^[0-9][0-9][0-9][0-9]$ ]] ; then
+  echo "Please enter 4 digit year."; unset year; 
+  validyear=0
+ elif ! date -d "$year-01-01" >/dev/null; then
+  echo "Please enter a proper year"; unset year
+  validyear=0
+ else
+  currentyear=$(date +'%Y')
+  if [ $year -gt $currentyear ]; then	#only accept up to present year
+   echo "Academic year unavailable."; unset year
+   validyear=0
+  fi
+ fi 
+done
+
+until [[ $validsem = 1 ]]
+do
+ echo -n -e "\nSemester (1 / 2 / 3): "; read sem; validsem=1
+ if [[ $sem =~ ^[Qq]$ ]]; then
+   echo "returning to menu..."; sleep 1; ./t1menu ; exit 0
+ fi
+ if ! [[ $sem =~ ^[123]$ ]]; then
+  echo "Please enter 1, 2, or 3 only"; unset sem
+  validsem=0
+ fi
+done
+
+echo -e "Student Id        : $stuID\n" > $resultFile
+echo -e "Student Name      : $stuName\n" >> $resultFile
+echo -e "Academic Year     : $year\n" >> $resultFile
+echo -e "Semester          : $sem\n" >> $resultFile
+echo -e ' '$_{1..30}'=' >> $resultFile
+
+printf " %-17s%-18s%-18s%-15s%s\n" "Course Code:" "Marks Obtained:" "Grade Obtained:" "Remark:" "Quality Point:" >> $resultFile
+echo -e ' '$_{1..30}'=' >> $resultFile
+
+Addstumarks=1
+until [ $Addstumarks = 0 ]
+do  
+   echo -e ' '$_{1..31}'\b-'
+   i=$((++i))
+   numberccode=$( wc -l < course.txt )
+   if [[ $i -gt $numberccode  ]]
+   then
+     echo -n -e "\nAlready saved all available course marks. Press Enter to return."
+     read null
+     printf "\n%68s%14.2f" "Total Quality Points:" $totalpoints >> $resultFile
+     ./studval
+     exit 0
+   fi
+
+   validcode=0
+   until [[ $validcode = 1 ]]
+   do
+     
+     echo -n -e "\nPlease enter the course code [eg. Bxxx1011]: "; read ccode; validcode=1
+     ccode=${ccode^^}
+     
+    if ! [[ $ccode =~ ^B[A-Z][A-Z][A-Z][1-4][0-9][0-9][1-4]$ ]];
+     then
+     echo "Invalid Course code. Please enter again."; unset ccode; validcode=0
+    elif grep -q $ccode $courses
+     then
+       if grep -q $ccode $chksvdccode
+       then 
+        echo "The result of this course already saved."
+         validcode=0
+       fi
+    else
+     echo "Course not available! Please enter again."; unset ccode; validcode=0
+    fi
+   
+   done
+   
+   input=0
+   while [[ $input = 0 ]]
+   do
+     echo -n -e "\nPlease enter the marks obtained (0-100): "; read marks; input=1
+     markrange $marks
+     if [ $input = 0 ]; then
+      echo "Marks are between 0 to 100."; unset marks
+      input=0
+     fi
+   done
+   
+   courseList=$(grep "$ccode" "$courses")
+   IFS=: read code courseName credHr<<< $courseList
+     
+   printf "  %-17s%-18s%-17s%-18s%10.2f\n" $code $marks $grade $remark $(awk "BEGIN {print $credHr*$gpa}") >> $resultFile
+   
+   totalpoints=$( awk "BEGIN {print $totalpoints+$credHr*$gpa}" );  
+
+   while [[ $input2=0 ]]
+   do
+   echo -e -n "\nPress (y) to continue to enter student's marks or (q) to return: "
+   read choice
+
+   case "$choice" in
+   [Yy])  Addstumarks=1
+          break ;;
+
+   [Qq])  printf "\n%68s%14.2f" "Total Quality Points:" $totalpoints >> $resultFile
+   	 ./studval
+          exit ;;
+          
+   *)     echo "Please enter (y) or (q)." ;;
+   esac
+   done
+   
+done
+

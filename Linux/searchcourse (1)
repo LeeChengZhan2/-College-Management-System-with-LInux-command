@@ -1,0 +1,55 @@
+#!/bin/bash
+clear
+courses="./course.txt"	#list of courses
+
+echo -e "\t\t\e[4;1mSearch Course Details Form\e[0m\n"
+
+until [[ $valid = 1 ]]
+do
+ echo -n -e "\nEnter Course Code: "; read ccode; valid=1
+ ccode=${ccode^^} 	#capitalise course code
+ 
+ if [[ $ccode =~ ^[Qq]$ ]]; then	#allow user to exit script by entering 'Q'
+   echo "returning to menu..."; sleep 1; ./t1menu ; exit 0
+ fi
+ if ! [[ $ccode =~ ^B[A-Z][A-Z][A-Z][1-4][0-9][0-9][1-4]$ ]]; 
+  then
+     echo "Invalid Course code. Please enter again."; unset ccode; valid=0
+ elif ! [ -f "$courses" ]; then
+   echo "Course file not available.";
+   echo "Press Enter to return."; read null
+   ./t1menu; exit 0
+ elif [ ! -s $student ]; then
+   echo "Course file empty.";
+   echo "Press Enter to return."; read null
+   ./t1menu; exit 0
+ elif grep -q $ccode $courses
+ then
+  courseList=$(grep "$ccode" "$courses")
+  IFS=: read coursecode courseName credHr <<< $courseList
+  echo -e "\n"
+  echo "Course Name    : $courseName"
+  echo "Credit Hours   : $credHr"
+ else
+  echo "Course not found! Please enter again."; unset ccode; valid=0
+ fi
+done
+
+until [[ $input = 1 ]]
+do
+  echo -n -e "\nSearch Another Course? (y)es or (q)uit: "
+ read choice
+ input=1
+ case "$choice" in
+ [Yy]) ./searchcourse; break
+    ;;
+ [Qq]) echo "returning..."
+       sleep 1
+       ./t1menu; break
+    ;;
+ *) echo "Please select (y)es or (q)uit"
+    echo "Press (q) to return to College Management Menu"
+    input=0
+    ;;
+ esac
+done

@@ -1,0 +1,38 @@
+#!/bin/bash
+clear
+echo "College Management Menu"
+echo "======================="
+echo "1 -Add New Students"
+echo "2 -Add New Courses"
+echo "3 -Grade Students"
+echo "4 -Search Students Details"
+echo "5 -Search Course Details"
+echo -e " \nQ--Quit (Exit from program)"
+
+until [[ $input = 1 ]] #loop til valid input obtained
+do
+ echo -n -e "\nPlease select a choice: "
+ read choice
+ input=1		#received input
+ case "$choice" in
+ [\s1\s]) ./progmenu; break
+    ;;
+ [\s2\s]) ./addcourse; break
+    ;;
+ [\s3\s]) ./studval; break
+    ;;
+ [\s4\s]) ./searchstud; break
+    ;;
+ [\s5\s]) ./searchcourse; break
+    ;;
+ [Qq]) echo "exiting..."
+       sleep 3
+       ;;
+ *) echo "Please select 1-5 or (Q)uit"
+    input=0	#input invalid
+    ;;
+ esac
+done
+
+
+

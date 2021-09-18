@@ -1,0 +1,169 @@
+#!/bin/bash
+clear
+progId=$1
+student=./student.txt
+    echo  "====================="
+    echo  "Add New Student Form"
+    echo -e "=====================\n"
+    
+    #Let system only read format [ 12ABC12345 ]
+    stuId=""
+    while  [[ ! $stuId =~ ^[0-9]{2}[A-Z]{3}[0-9]{5}$ ]]
+    do
+       echo -n "Student ID                    :"; read stuId
+       stuId=${stuId^^}
+       if [[ $stuId =~ ^[Qq]$ ]]; then
+   	echo "quiting to menu..."; sleep 1; ./t1menu ; exit 0
+       fi
+       if  [[ ! $stuId =~ ^[0-9]{2}[A-Z]{3}[0-9]{5}$ ]]
+       then 
+         echo -e "Invalid Input! Pleas enter again. FORMAT [12ABC34567]\n"
+       elif ! [ -f "$student" ]; then
+           break 
+       elif grep -q "$stuId" "$student"
+       then
+           echo -e "Student ID already exists. Please enter again.\n"
+           stuId=""
+       fi
+    done
+    
+    #Let system only read alphabet
+    stuName=""
+    while  [[ ! $stuName  =~ [a-zA-Z]{3,30} ]]
+    do
+       echo -n "Student Name                  :"; read stuName
+       stuName=$( echo "${stuName,,}" | awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1' )
+       if [[ $stuName =~ ^[Qq]$ ]]; then
+    	echo "quiting to menu..."; sleep 1; ./t1menu ; exit 0
+       fi
+       if  [[ ! $stuName  =~ [a-zA-Z]{3,30} ]]
+       then 
+         echo -e "Invalid Input! Please key in alphabet only.\n"
+       fi
+    done
+    
+    #Let system only read date format
+    birDate=""
+    while  [[ ! $birDate  =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] 
+    do
+       echo -n "Birth Date(YYYY-MM-DD)        :"; read birDate
+       currentyear=$(date +'%Y')
+       biryear=$( echo "$birDate" | cut -c1-4  )
+       if [[ $birDate =~ ^[Qq]$ ]]; then
+   	echo "quiting to menu..."; sleep 1; ./t1menu ; exit 0
+       fi
+       if  [[ ! $birDate  =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] 
+       then
+         echo -e "Invalid Input! Please key in the format correctly (YYYY-MM-DD) in digits.\n"
+         birDate=""
+       elif ! date -d "$birDate" >/dev/null 
+       then
+         echo -e "Please enter again.\n"
+         birDate=""
+       elif [ $biryear -gt $currentyear ]
+       then
+            echo -e "Invalid date. Please enter again.\n"
+            birDate=""
+       fi
+    done
+    
+    #Let system only read format(012-3214567)
+    conNumb=""
+    while [[ ! $conNumb =~ ^[0][0-9]{2}-[0-9]{7,8}$ ]]
+    do
+       echo -n "Contact Number (eg.012-345678):"; read conNumb
+       if [[ $conNumb =~ ^[Qq]$ ]]; then
+   	echo "quiting to menu..."; sleep 1; ./t1menu ; exit 0
+       fi
+       if [[ ! $conNumb =~ ^[0][0-9]{1,2}-[0-9]{7,8}$ ]]
+       then
+         echo -e "Invalid Input! Please key in the format correctly (012-3214567) in digits.\n"
+       fi
+    done
+    
+    #Let mailing address cant be null
+    maiAddr=""
+    while [ -z "$maiAddr" ]
+    do
+       echo -n "Mailing Address               :"; read maiAddr
+       maiAddr=$( echo "${maiAddr,,}" | awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1' )
+       if [[ $maiAddr =~ ^[Qq]$ ]]; then
+   	echo "quiting to menu..."; sleep 1; ./t1menu ; exit 0
+       fi
+       if [ -z "$maiAddr" ]
+       then
+         echo -e "Please enter an address.\n"
+       fi
+    done
+    
+    #Let system read the email format 
+    emaAddr=""
+    regex="^[a-zA-Z0-9\._-]+\@[a-zA-Z0-9._-]+\.[a-zA-Z]+\$" 
+    while [[ ! $emaAddr =~ $regex ]]
+    do
+       echo -n "Email Address                 :"; read emaAddr 
+       if [[ $emaAddr =~ ^[Qq]$ ]]; then 
+   	echo "quiting to menu..."; sleep 1; ./t1menu ; exit 0
+       fi
+       if [[ ! $emaAddr =~ $regex ]]
+       then
+        echo -e "Invalid input.Please key in your email format (xxx12@gmail.com) correctly.\n"
+       fi
+    done
+    
+    echo ""
+    echo "program ID     : $progId"
+    echo "Student ID     : $stuId"
+    echo "Student Name   : $stuName"
+    echo "Birthday       : $birDate"
+    echo "Contact Number : $conNumb"
+    echo "Mailing Address: $maiAddr"
+    echo "Email Address  : $emaAddr"
+    echo ""
+    input1=0
+    until [ $input1 = 1 ]
+    do
+    echo -n -e "Confirm details?\nPress (y)es to save or (n)o to discard > "; read save
+    
+       if [[ $save = [Yy] ]]
+       then
+          echo "$progId:$stuId:$stuName:$birDate:$conNumb:$maiAddr:$emaAddr" >> student.txt
+          echo "..."
+          sleep 1
+          echo "Successfully Saved"
+          input1=1
+       elif [[ $save = [Nn] ]]
+       then
+         echo""
+         input1=1
+       else
+          echo ""
+          echo "Press (y)es for save and (n)o to discard."
+          echo ""
+       fi
+    done
+  
+    # loop in add another student if user press !y!q
+    input2=0
+    until [ $input2 = 1 ]
+    do
+      echo  ""
+      echo -n "Add Another Student?(y)es or (q)uit :"; read choice
+      echo ""
+      # echo "Press(q) to return to College Management Menu"
+  
+      if [[ $choice = [Yy] ]]
+      then
+          echo ""
+          ./progmenu;
+          exit
+      elif [[ $choice = [Qq] ]]
+      then
+          ./t1menu
+          exit
+      else
+          echo "Please respond with (y)es or (q)uit"
+          echo ""
+      fi
+    done
+

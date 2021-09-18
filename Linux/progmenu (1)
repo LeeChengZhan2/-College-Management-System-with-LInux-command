@@ -1,0 +1,40 @@
+#!/bin/bash
+clear
+echo "Programme Selection Menu"
+echo "=========================="
+echo ""
+echo "[T]---RIT (Bachelor in Information Technology)"
+echo "[D]---RSD (Bachelor in Software Development)"
+echo "[S]---RST (Bachelor in Interactive Software Technology)"
+echo "[E]---REI (Bachelor in Enterprise Information System)" 
+echo "[F]---RSF (Bachelor in Software Engineering)"
+echo -e "\nQ-----Quit(Return to College Management Menu)"
+input=0
+until [ $input = 1 ]	#loop til valid input
+do
+ echo -n -e "\nPlease select a choice: "
+ read choice
+ input=1
+ 
+ case "$choice" in
+ [Tt]) ./addstud "RIT"
+    ;;
+ [Dd]) ./addstud "RSD" 
+    ;;
+ [Ss]) ./addstud "RST"
+    ;;
+ [Ee]) ./addstud "REI" 
+    ;;
+ [Ff]) ./addstud "RSF" 
+    ;;
+ [Qq]) echo "returning..."
+       sleep 1
+       ./t1menu
+       exit 0
+       ;;
+ *) echo "Please select (T/D/S/E/F) or press (Q) to quit"
+    input=0
+    ;;
+ esac
+done
+

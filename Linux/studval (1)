@@ -1,0 +1,58 @@
+#!/bin/bash
+clear 
+student=./student.txt
+echo -e "\t\tStudent Validation Form"
+echo -e ' '$_{1..31}'\b_'
+
+until [[ $found = 1 ]]
+do
+ echo -n -e "Please enter the student's ID Number [Q to quit]: "; read ID; found=1
+ ID=${ID^^}
+ if  [[ ! $ID =~ ^[0-9]{2}[A-Z]{3}[0-9]{5}$ ]]
+ then
+  if [[ $ID =~ ^[Qq]$ ]]; then
+   echo "returning to menu..."; sleep 1; ./t1menu ; exit 0
+  fi
+  found=0
+  echo -e "Invalid ID format. Eg.[12ABC34567]\n"; unset ID
+ elif ! [ -f "$student" ]; then
+  echo "Student file not available.";
+  echo "Press Enter to return."; read null
+  ./t1menu; exit 0
+ elif [ ! -s $student ]; then
+  echo "Student file empty.";
+  echo "Press Enter to return."; read null
+  ./t1menu; exit 0
+ elif ! grep -q $ID $student; then
+  echo -e "Student ID not found. Enter again.\n"
+  unset ID; found=0
+ fi
+done
+
+studentList=$(grep "$ID" "$student")
+IFS=: read courseId stuId stuName birDate conNumb maiAddr <<< $studentList
+
+echo -e "\nStudent Name    : $stuName"
+echo -e "\nProgramme       : $courseId"
+
+until [[ $cont = 1 ]]
+do 
+ echo -e -n "\nPress (n) to continue to enter student's marks or (q) to quit: "
+ read choice
+ cont=1
+ case "$choice" in
+ [Nn]) ./studmarks $stuId "$stuName"; break
+    ;;
+ [Qq]) ./t1menu; break
+       echo "returning to menu..."
+       sleep 2
+       ;;
+ *) echo "Please select Co(n)tinue or (Q)uit"
+    cont=0
+    ;;
+ esac
+done
+
+
+   
+

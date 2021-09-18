@@ -1,0 +1,95 @@
+#!/bin/bash
+clear
+courses="./course.txt" #file for checking existing entries
+
+echo "           Add New Course Form"
+echo "          ====================="
+
+until [[ $coursecode =~ B[A-Z][A-Z][A-Z][1-4][0-9][0-9][1-4] ]]
+do
+  echo -n -e "\nCourse Code[eg.BACS2093]: "; read coursecode
+  coursecode=${coursecode^^}
+  if [[ $coursecode =~ ^[Qq]$ ]]; then
+   echo "returning to menu..."; sleep 1; ./t1menu ; exit 0
+  fi
+  if ! [[ $coursecode =~ ^B[A-Z][A-Z][A-Z][1-4][0-9][0-9][1-4]$ ]]; 
+  then
+     echo "Invalid Course code. Please enter again."; unset coursecode
+  elif ! [ -f "$courses" ]; then
+           break 
+  elif grep -q $coursecode $courses
+  then
+     echo "Course code already exists. Please enter again." ; unset coursecode
+  fi
+done
+
+until [[ $named = 1 ]]
+do
+  named=1
+  echo -n -e "\nCourse Name             : "; read coursename
+  coursename=$( echo "${coursename,,}" | awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1' )
+
+  if [[ $coursename =~ ^[Qq]$ ]]; then
+   echo "returning to menu..."; sleep 1; ./t1menu ; exit 0
+  fi
+  
+  if [[ $coursename =~ /s ]]
+  then 
+     echo "Please enter a course name."; unset coursename
+     named=0
+  elif  [[ ! $coursename  =~  [a-zA-Z]{3,30} ]]
+  then
+     echo "Please enter letter only"
+     named=0
+  elif ! [ -f "$courses" ]; then
+           break 
+  else
+     for str in $(cat course.txt); do
+       if [ "$coursename" = "$str" ]; then
+        echo "Course name already taken. Please enter again." ; unset coursename
+        named=0
+       fi
+     done
+  fi
+done
+
+until [[ $valid = 1 ]]
+do
+  valid=1
+  echo -n -e "\nCredit Hours (1-12)     : "; read credithour
+  if [[ $credithour =~ ^[Qq]$ ]]; then
+   echo "returning to menu..."; sleep 1; ./t1menu ; exit 0
+  fi
+  if ! [[ $credithour =~ ^([1-9]|1[0-2])$ ]]; then
+    echo "Please enter 1 to 12 only."; valid=0
+  fi
+done
+
+echo "$coursecode:$coursename:$credithour" >> course.txt
+echo "saving..."
+sleep 1
+echo "course details saved"
+
+until [[ $input = 1 ]]
+do
+  echo -n -e "\nAdd Another Course? (y)es or (q)uit: "
+ read choice
+ input=1
+ case "$choice" in
+ [Yy]) ./addcourse; break
+    ;;
+ [Qq]) echo "returning..."
+       sleep 1
+       ./t1menu; break
+    ;;
+ *) echo "Please select (y)es or (q)uit"
+    echo "Press (q) to return to College Management Menu"
+    input=0
+    ;;
+ esac
+done
+
+
+
+
+
