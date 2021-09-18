@@ -1,1 +1,1 @@
-# -College-Management-System-with-LInux-command
+# College-Management-System-with-Linux-Command
